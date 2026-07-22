@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AutoQuest</title>
+<style>
+  /* Reset and base */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #fffbcc; /* Soft yellow background */
+    color: #333;
+    display: flex;
+    justify-content: center;
+    padding: 30px 15px;
+    min-height: 100vh;
+    user-select: none;
+  }
+  .container {
+    max-width: 900px;
+    width: 100%;
+    background: #fffbea;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(255, 185, 0, 0.3);
+    padding: 25px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-size: 2.8rem;
+    color: #d18900;
+    margin: 0;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+  }
+  h2 {
+    font-weight: 600;
+    color: #8a6500;
+    font-size: 1.3rem;
+    margin-top: 5px;
+  }
+  /* Input section */
+  .input-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+  }
+  label.custom-file-upload {
+    cursor: pointer;
+    background: #ffd55a;
+    padding: 10px 18px;
+    border-radius: 7px;
+    font-weight: 600;
+    color: #6a4e00;
+    border: 2px solid #d9ad00;
+    transition: background 0.3s ease;
+    box-shadow: 0 3px 6px #b58a00a6;
+    user-select: none;
+  }
+  label.custom-file-upload:hover {
+    background: #ffcb00;
+  }
+  input[type="file"] {
+    display: none;
+  }
+  textarea#textInput {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 2px solid #d9ad00;
+    resize: vertical;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: inset 0 2px 5px #ffe477a3;
+  }
+  button#generateBtn {
+    margin-top: 10px;
+    background-color: #d18900;
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border-radius: 9px;
+    cursor: pointer;
+    box-shadow: 0 5px 10px #b07a00b8;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button#generateBtn:hover:not(:disabled) {
+    background-color: #e6a800;
+  }
+  button#generateBtn:disabled {
+    background-color: #e6c463;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  /* Preview and editable section */
+  #previewSection {
+    background: #fff7b2;
+    border-radius: 10px;
+    padding: 20px 25px;
+    box-shadow: inset 0 0 10px #ffd721cc;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  #previewSection h3 {
+    margin-top: 0;
+    color: #b27600;
+    border-bottom: 2px solid #b27600;
+    padding-bottom: 6px;
+    font-weight: 700;
+  }
+  .question-block {
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e4c800;
+  }
+  .question-block textarea {
+    width: 100%;
+    border: 2px solid #d9ad00;
+    border-radius: 6px;
+    resize: vertical;
+    padding: 8px 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1rem;
+    margin-top: 6px;
+    background: #fffde4;
+    color: #4b3d00;
+  }
+  .choices {
+    margin-top: 8px;
+  }
+  .choice-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .choice-item input[type="text"] {
+    flex: 1;
+    padding: 6px 10px;
+    font-size: 0.95rem;
+    border: 2px solid #d9ad00;
+    border-radius: 6px;
+    background: #fffde4;
+    color: #4b3d00;
+  }
+  .choice-item input[type="radio"] {
+    accent-color: #d18900;
+  }
+  /* Export buttons */
+  .export-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 15px;
+  }
+  .export-buttons button {
+    background: #d18900;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 5px 10px #b07a00b8;
+    transition: background 0.3s ease;
+    user-select: none;
+    flex: 1 1 160px;
+  }
+  .export-buttons button:hover {
+    background: #e6a800;
+  }
+  /* Responsive */
+  @media (max-width: 600px) {
+    h1 {
+      font-size: 2rem;
+    }
+    h2 {
+      font-size: 1.1rem;
+    }
+    .export-buttons button {
+      flex-basis: 100%;
+    }
+  }
+  /* Loading spinner */
+  .spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #d18900;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1.1s linear infinite;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+  }
+</style>
+</head>
+<body>
+  <div class="container" role="main" aria-label="AutoQuest Application">
+    <header>
+      <h1>AutoQuest</h1>
+      <h2>From Notes to Questions — Instantly and Intelligently</h2>
+    </header>
+    <section aria-labelledby="inputSectionHeading" class="input-section">
+      <div style="flex: 1 1 100%;">
+        <label for="textInput" style="font-weight: 700; color: #916f00;">Paste Notes / Text:</label>
+        <textarea id="textInput" placeholder="Paste or type text content here... (Supports large texts)"></textarea>
+      </div>
+      <div style="display:flex; gap: 12px; flex-wrap: wrap; width: 100%; justify-content: center; margin-top: 5px;">
+        <label class="custom-file-upload" for="imageInput" aria-label="Upload images for question generation">
+          Upload Image(s)
+          <input type="file" id="imageInput" accept="image/*" multiple aria-describedby="imageInputDesc" />
+        </label>
+        <label class="custom-file-upload" for="pdfInput" aria-label="Upload PDF file for question generation">
+          Upload PDF
+          <input type="file" id="pdfInput" accept="application/pdf" aria-describedby="pdfInputDesc" />
+        </label>
+      </div>
+      <button id="generateBtn" aria-live="polite" aria-busy="false" disabled>Generate Questions</button>
+    </section>
+
+    <section id="previewSection" aria-live="polite" aria-atomic="true" aria-label="Generated questions preview" tabindex="0" style="margin-top: 20px;">
+      <h3>Generated Questions Preview</h3>
+      <div id="questionsContainer" tabindex="0">
+        <p style="font-style: italic; color: #9f8600;">No questions generated yet. Please provide notes or upload files and click "Generate Questions".</p>
+      </div>
+    </section>
+
+    <section class="export-buttons" aria-label="Export options" style="margin-top: 10px;">
+      <button id="exportTxtBtn" disabled aria-disabled="true">Export as Text</button>
+      <button id="exportJsonBtn" disabled aria-disabled="true">Export as JSON</button>
+    </section>
+  </div>
+
+  <script>
+    // Utility function: sleep
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Elements references
+    const textInput = document.getElementById('textInput');
+    const imageInput = document.getElementById('imageInput');
+    const pdfInput = document.getElementById('pdfInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const questionsContainer = document.getElementById('questionsContainer');
+    const exportTxtBtn = document.getElementById('exportTxtBtn');
+    const exportJsonBtn = document.getElementById('exportJsonBtn');
+
+    // State
+    let extractedText = "";
+    let generatedQuestions = [];
+
+    // Enable generate button if there is any input
+    function updateGenerateButtonState() {
+      if (textInput.value.trim() !== "" || imageInput.files.length > 0 || pdfInput.files.length > 0) {
+        generateBtn.disabled = false;
+        generateBtn.setAttribute('aria-disabled', 'false');
+      } else {
+        generateBtn.disabled = true;
+        generateBtn.setAttribute('aria-disabled', 'true');
+      }
+    }
+
+    textInput.addEventListener('input', () => {
+      updateGenerateButtonState();
+    });
+    imageInput.addEventListener('change', () => {
+      updateGenerateButtonState();
+    });
+    pdfInput.addEventListener('change', () => {
+      updateGenerateButtonState();
+    });
+
+    // Text extraction from Images - Using Tesseract.js CDN
+    async function extractTextFromImages(files) {
+      if (!files.length) return "";
+      if (!window.Tesseract) {
+        console.warn("Tesseract.js not loaded");
+        return "";
+      }
+      let combinedText = "";
+      for (const file of files) {
+        const imgDataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("Failed to read image"));
+          reader.readAsDataURL(file);
+        });
+        questionsContainer.innerHTML = `<p>Extracting text from image: <strong>${file.name}</strong>...</p>` + createSpinner();
+        const { data: { text } } = await Tesseract.recognize(imgDataUrl, 'eng', { logger: m => {} });
+        combinedText += text + "\n";
+        await sleep(250);
+      }
+      return combinedText;
+    }
+
+    // Text extraction from PDF using PDF.js CDN
+    async function extractTextFromPDF(file) {
+      if (!file) return "";
+      if (!window.pdfjsLib) {
+        console.warn("PDF.js not loaded");
+        return "";
+      }
+      const arrayBuffer = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Failed to read PDF"));
+        reader.readAsArrayBuffer(file);
+      });
+
+      const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+      let fullText = "";
+      const maxPages = Math.min(pdf.numPages, 10); // Limit pages for performance
+      for (let i = 1; i <= maxPages; i++) {
+        questionsContainer.innerHTML = `<p>Extracting text from PDF page: <strong>${i}</strong> / ${pdf.numPages}...</p>` + createSpinner();
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const strings = content.items.map(item => item.str);
+        fullText += strings.join(" ") + "\n";
+        await sleep(150);
+      }
+      return fullText;
+    }
+
+    // Create spinner HTML snippet
+    function createSpinner() {
+      return '<span class="spinner" role="img" aria-label="loading"></span>';
+    }
+
+    // Simple AI-based question generation mock function
+    // This simulates generating multiple choice questions from text with answer and 3 distractors
+    // In reality, you'd use an AI model or API call here
+    function generateQuestionsFromText(text) {
+      // Naive approach: split text into sentences and make simple questions from notable sentences
+      const sentences = text.match(/[^\.!\?]+[\.!\?]+/g) || [];
+      const questions = [];
+      
+      let qCount = 0;
+      for (let sentence of sentences) {
+        if (qCount >= 10) break; // Limit max questions for UI usability
+        
+        const trimmed = sentence.trim();
+        if (trimmed.length < 10) continue; // Skip short sentences
+        
+        // Generate a question by replacing a keyword with a blank and proposing answers
+        // We'll pick a random word longer than 4 letters to blank
+        const words = trimmed.split(/\s+/);
+        const candidates = words.filter(w => w.length > 4);
+        if (candidates.length === 0) continue;
+        const answerIndex = Math.floor(Math.random() * candidates.length);
+        const answer = candidates[answerIndex].replace(/[,.!?]/g, '');
+        
+        // Construct question sentence with blank
+        const questionText = words.map(w => (w === candidates[answerIndex] ? "_____" : w)).join(' ');
+        
+        // Create 3 distractors by changing answer letters or picking nearby words
+        const distractors = [];
+        while (distractors.length < 3) {
+          // Pick a random word from candidates excluding the actual answer
+          const choice = candidates[Math.floor(Math.random() * candidates.length)].replace(/[,.!?]/g, '');
+          if (choice.toLowerCase() !== answer.toLowerCase() && !distractors.includes(choice)) {
+            distractors.push(choice);
+          }
+        }
+        
+        // Shuffle answer + distractors
+        const options = [answer, ...distractors].sort(() => 0.5 - Math.random());
+        
+        questions.push({
+          question: questionText,
+          options: options,
+          correctAnswer: answer
+        });
+        qCount++;
+      }
+      return questions.length ? questions : [{
+        question: "Sorry, no valid questions could be generated from the provided content.",
+        options: ["N/A"],
+        correctAnswer: "N/A"
+      }];
+    }
+
+    // Render generated questions to preview area
+    function renderQuestions(questions) {
+      if (!questions || !Array.isArray(questions) || questions.length === 0) {
+        questionsContainer.innerHTML = '<p style="font-style: italic; color: #9f8600;">No questions generated.</p>';
+        return;
+      }
+      const container = document.createElement('div');
+      container.setAttribute('role', 'list');
+      questions.forEach((q, i) => {
+        const questionBlock = document.createElement('div');
+        questionBlock.className = "question-block";
+        questionBlock.setAttribute('role', 'listitem');
+
+        // Editable question text
+        const questionLabel = document.createElement('label');
+        questionLabel.textContent = `Q${i + 1}:`;
+        questionLabel.style.fontWeight = "700";
+        questionLabel.htmlFor = `question-text-${i}`;
+        questionBlock.appendChild(questionLabel);
+
+        const questionTextArea = document.createElement('textarea');
+        questionTextArea.id = `question-text-${i}`;
+        questionTextArea.value = q.question;
+        questionTextArea.rows = 2;
+        questionTextArea.setAttribute('aria-label', `Edit question ${i + 1}`);
+        questionBlock.appendChild(questionTextArea);
+
+        // Choices radio button group
+        const choicesDiv = document.createElement('div');
+        choicesDiv.className = "choices";
+        choicesDiv.setAttribute('role', 'radiogroup');
+        choicesDiv.setAttribute('aria-label', `Answer choices for question ${i + 1}`);
+
+        q.options.forEach((opt, idx) => {
+          const choiceItem = document.createElement('div');
+          choiceItem.className = "choice-item";
+
+          const choiceInput = document.createElement('input');
+          choiceInput.type = "radio";
+          choiceInput.name = `answer-${i}`;
+          choiceInput.id = `q${i}-choice-${idx}`;
+          choiceInput.value = opt;
+          choiceInput.checked = (opt === q.correctAnswer);
+          choiceInput.setAttribute('aria-checked', choiceInput.checked ? "true" : "false");
+
+          choiceInput.addEventListener('change', () => {
+            // Update correctAnswer in state when user changes selection
+            questions[i].correctAnswer = choiceInput.value;
+            // Reflect ARIA state
+            Array.from(choicesDiv.querySelectorAll('input[type=radio]')).forEach(inp => {
+              inp.setAttribute('aria-checked', inp === choiceInput ? 'true' : 'false');
+            });
+          });
+
+          choiceItem.appendChild(choiceInput);
+
+          const choiceLabel = document.createElement('input');
+          choiceLabel.type = "text";
+          choiceLabel.value = opt;
+          choiceLabel.setAttribute('aria-label', `Edit option ${idx + 1} for question ${i + 1}`);
+
+          choiceLabel.addEventListener('input', (e) => {
+            questions[i].options[idx] = e.target.value;
+            if (questions[i].correctAnswer === opt) {
+              questions[i].correctAnswer = e.target.value;
+              choiceInput.value = e.target.value;
+            }
+          });
+
+          choiceItem.appendChild(choiceLabel);
+
+          choicesDiv.appendChild(choiceItem);
+        });
+
+        questionBlock.appendChild(choicesDiv);
+        container.appendChild(questionBlock);
+      });
+      // Replace old content
+      questionsContainer.innerHTML = '';
+      questionsContainer.appendChild(container);
+      questionsContainer.focus();
+
+      // Enable export buttons
+      exportTxtBtn.disabled = false;
+      exportTxtBtn.setAttribute('aria-disabled', 'false');
+      exportJsonBtn.disabled = false;
+      exportJsonBtn.setAttribute('aria-disabled', 'false');
+    }
+
+    // Export questions as text
+    function exportQuestionsAsText(questions) {
+      let output = "";
+      questions.forEach((q, i) => {
+        output += `Q${i + 1}: ${q.question}\n`;
+        q.options.forEach((opt, idx) => {
+          const prefix = (opt === q.correctAnswer) ? '(Correct) ' : '          ';
+          output += `    ${String.fromCharCode(65 + idx)}. ${prefix}${opt}\n`;
+        });
+        output += "\n";
+      });
+      return output;
+    }
+
+    // Export questions as JSON
+    function exportQuestionsAsJSON(questions) {
+      // Only export cleaned current states from UI editable fields
+      return JSON.stringify(questions, null, 2);
+    }
+
+    // Clear file inputs for better UX (to allow same file re-upload)
+    function clearFileInputs() {
+      imageInput.value = "";
+      pdfInput.value = "";
+    }
+
+    // Main handler on generate button clicked
+    generateBtn.addEventListener('click', async () => {
+      generateBtn.disabled = true;
+      generateBtn.setAttribute('aria-busy', 'true');
+      generatedQuestions = [];
+      questionsContainer.innerHTML = "<p>Extracting and processing content, please wait...</p>" + createSpinner();
+
+      // Reset extractedText
+      extractedText = "";
+
+      // 1. Extract text input if any
+      if (textInput.value.trim()) {
+        extractedText += textInput.value.trim() + "\n";
+      }
+
+      // 2. Extract text from images
+      if (imageInput.files.length) {
+        let imgText = await extractTextFromImages(imageInput.files);
+        if (imgText.trim()) {
+          extractedText += imgText + "\n";
+        }
+      }
+
+      // 3. Extract text from PDF
+      if (pdfInput.files.length) {
+        let pdfText = await extractTextFromPDF(pdfInput.files[0]);
+        if (pdfText.trim()) {
+          extractedText += pdfText + "\n";
+        }
+      }
+
+      // If no text extracted show error
+      if (!extractedText.trim()) {
+        questionsContainer.innerHTML = '<p style="font-style: italic; color: #a04a00;">No text content found from the input(s). Please add text, images with text, or PDFs with text.</p>';
+        generateBtn.disabled = false;
+        generateBtn.setAttribute('aria-busy', 'false');
+        clearFileInputs();
+        updateGenerateButtonState();
+        return;
+      }
+
+      // 4. AI-based question generation (mock implementation)
+      questionsContainer.innerHTML = "<p>Generating questions intelligently...</p>" + createSpinner();
+      await sleep(600); // simulate AI processing delay
+
+      generatedQuestions = generateQuestionsFromText(extractedText);
+
+      // 5. Render Questions preview editable
+      renderQuestions(generatedQuestions);
+
+      generateBtn.disabled = false;
+      generateBtn.setAttribute('aria-busy', 'false');
+      clearFileInputs();
+      updateGenerateButtonState();
+    });
+
+    exportTxtBtn.addEventListener('click', () => {
+      if (!generatedQuestions.length) return;
+      // Update generatedQuestions from UI editable changes
+      syncQuestionsFromUI();
+      const textOutput = exportQuestionsAsText(generatedQuestions);
+      downloadFile('autoquest_questions.txt', textOutput, 'text/plain');
+    });
+
+    exportJsonBtn.addEventListener('click', () => {
+      if (!generatedQuestions.length) return;
+      syncQuestionsFromUI();
+      const jsonOutput = exportQuestionsAsJSON(generatedQuestions);
+      downloadFile('autoquest_questions.json', jsonOutput, 'application/json');
+    });
+
+    // Sync edits from UI back to generatedQuestions array
+    function syncQuestionsFromUI() {
+      const questionBlocks = questionsContainer.querySelectorAll('.question-block');
+      questionBlocks.forEach((block, i) => {
+        const questionTextarea = block.querySelector('textarea');
+        const choiceTextInputs = block.querySelectorAll('.choice-item input[type=text]');
+        const choiceRadioInputs = block.querySelectorAll('.choice-item input[type=radio]');
+        
+        if (questionTextarea) {
+          generatedQuestions[i].question = questionTextarea.value;
+        }
+        const options = [];
+        choiceTextInputs.forEach(input => options.push(input.value));
+        generatedQuestions[i].options = options;
+        // Correct answer from radio checked
+        for (let radio of choiceRadioInputs) {
+          if (radio.checked) {
+            generatedQuestions[i].correctAnswer = radio.value;
+            break;
+          }
+        }
+      });
+    }
+
+    // Download helper function
+    function downloadFile(filename, text, type) {
+      const blob = new Blob([text], {type});
+      const a = document.createElement('a');
+      a.download = filename;
+      a.href = URL.createObjectURL(blob);
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    // Load external libs for image OCR and PDF text extraction
+   
+    // Load Tesseract.js for OCR (image text extraction)
+    function loadTesseract() {
+      return new Promise((resolve, reject) => {
+        if (window.Tesseract) resolve();
+        const script = document.createElement('script');
+        script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@2.1.5/dist/tesseract.min.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+
+    // Load PDF.js for PDF text extraction
+    function loadPdfJs() {
+      return new Promise((resolve, reject) => {
+        if (window.pdfjsLib) resolve();
+        // PDF.js main script
+        const pdfScript = document.createElement('script');
+        pdfScript.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.min.js";
+        pdfScript.onload = () => {
+          // PDF.js worker src config
+          pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.worker.min.js";
+          resolve();
+        };
+        pdfScript.onerror = reject;
+        document.head.appendChild(pdfScript);
+      });
+    }
+
+    // Initialize by loading required libs
+    async function init() {
+      try {
+        await Promise.all([loadTesseract(), loadPdfJs()]);
+      } catch (err) {
+        console.warn("Some functionality may be limited due to failed library load.", err);
+      }
+    }
+    init();
+  </script>
+</body>
+</html>
