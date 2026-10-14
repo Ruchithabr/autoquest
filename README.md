@@ -57,18 +57,6 @@ To run this project locally, follow these steps:
 5. **Open in your browser:**
    Navigate to `http://127.0.0.1:5000/`
 
-## 📂 Project Structure
-
-```text
-autoquest/
-│
-├── static/          # CSS, JavaScript, and image files
-├── templates/       # HTML files (Flask Jinja2 templates)
-├── app.py           # Main Flask application
-├── requirements.txt # Python dependencies
-├── .gitignore       # Files to ignore in Git
-└── README.md        # Project documentation
-```
 
 ## 📫 Connect with Me
 
